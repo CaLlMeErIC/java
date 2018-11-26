@@ -1,0 +1,137 @@
+package mytest;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.io.*;
+public class homewok {
+static String[] str=null;
+static int count=0;
+static int networknum=0;
+static HashMap<String,HashSet> mapa = new HashMap<String,HashSet>();
+static HashMap<Integer,HashSet> network = new HashMap<Integer,HashSet>();
+public static void readTxt(String filePath) {
+
+  try {
+    File file = new File(filePath);
+    if(file.isFile() && file.exists()) {
+      InputStreamReader isr = new InputStreamReader(new FileInputStream(file), "utf-8");
+      BufferedReader br = new BufferedReader(isr);
+     String lineTxt = null;
+     while ((lineTxt = br.readLine()) != null) {
+       System.out.println(lineTxt);
+       str=lineTxt.split(",");
+       count=count+1;
+       addRelation(mapa,str[0],str[1]);
+       addRelation(mapa,str[1],str[0]);
+       checknetwork(network,str[0],str[1]);
+      }
+      br.close();
+    } else {
+      System.out.println("文件不存在!");
+    }
+    
+  } catch (Exception e) {
+    System.out.println("文件读取错误!!"+e);
+ }
+ 
+  }
+static void checknetwork(HashMap<Integer,HashSet> hashmapResult,
+	String Node1,String Node2){
+	int flag=0;
+    HashSet tmpset=new HashSet();
+    HashSet other=new HashSet();
+    flag=0;
+    for(int i=1;i<=networknum;i++)
+    {tmpset=hashmapResult.get(i);
+       if(tmpset.contains(Node1)||tmpset.contains(Node2))
+       {
+    	   tmpset.add(Node2);
+    	   tmpset.add(Node1);
+    	   flag=i;
+       }
+       for(int j=i+1;j<=networknum;j++)
+       {other=hashmapResult.get(j);
+        if(other.contains(Node1) || other.contains(Node2))
+            {tmpset.addAll(other);
+            removenet(hashmapResult,j);
+            break;
+            }
+       
+       }
+       hashmapResult.remove(i);
+       hashmapResult.put(i,tmpset);
+
+    }
+    if(flag==0)
+    {networknum=networknum+1;
+   HashSet nset=new HashSet();
+   nset.add(Node1);
+   nset.add(Node2);
+   hashmapResult.put(networknum, nset);
+    }
+}
+static void removenet(HashMap<Integer,HashSet> hashmapResult,int j)
+{
+HashSet tmpset=new HashSet();
+	for(int i=j;i<=networknum-1;i++)
+  {tmpset= hashmapResult.get(i+1);
+  hashmapResult.remove(j);
+  hashmapResult.put(j,tmpset);
+	}	
+ networknum--;
+}
+static void addRelation(HashMap<String,HashSet> hashmapResult,
+		String Node1,String Node2){
+    HashSet tmpset=new HashSet();
+    if (hashmapResult.containsKey(Node1)){
+        tmpset=hashmapResult.get(Node1);
+        tmpset.add(Node2);
+    }else{
+        tmpset.add(Node2);
+        hashmapResult.put(Node1, tmpset);
+       
+    }
+}
+ 
+ static void shownetwork(HashMap<Integer,HashSet> hashmapResult){
+    HashSet myset=new HashSet();
+    System.out.println();
+    System.out.println("NETWORK NUM:"+networknum);
+    for(int i=1;i<=networknum;i++)
+    {if(hashmapResult.containsKey(i))
+    {
+    myset=hashmapResult.get(i);
+    Iterator it = myset.iterator();
+    System.out.println("网络"+i+':');
+    Object neighborID = 0;
+    while(it.hasNext()) {
+     neighborID = it.next();
+    System.out.print(neighborID + ",");
+    }
+    System.out.println();
+    }
+    }
+}
+static void showconnection(HashMap<String,HashSet> hashmapResult,String node) 
+{HashSet tempset=new HashSet();
+tempset=hashmapResult.get(node);
+Iterator it = tempset.iterator();
+Object neighborID = 0;
+int count=0;
+System.out.println("和"+node+"相连的节点为");
+while(it.hasNext()) {
+ neighborID = it.next();
+ count++;
+System.out.print(neighborID + ",");
+}
+System.out.println();
+System.out.println(node+"的度为"+(count));
+}
+  public static void main(String[] args) {
+    String filePath = "C:\\Users\\Administrator\\Desktop\\a.txt";
+    readTxt(filePath);
+    shownetwork(network);
+    showconnection(mapa,"1");
+  }
+}
